@@ -39,7 +39,9 @@
 
 ## Способ 3. rw init=/sysroot/bin/sh
 + В строке начинающейся с **linux16** заменяем ro на **rw init=/sysroot/bin/sh** и нажимаем **ctrl+x** для загрузки в систему
+
 ![Image alt](/image/boot5.png)
+
 ![Image alt](/image/boot6.png)
 
 #Установить систему с LVM, после чего переименовать VG
@@ -56,8 +58,11 @@
   Volume group "centos" successfully renamed to "OtusRoot"
 ```
 Далее правим /etc/fstab/, /etc/default/grub, /boot/grub2/grub.cfg. Везде заменяем старое название на новое.
+
 ![Image alt](/image/boot7.png)
+
 ![Image alt](/image/boot8.png)
+
 ![Image alt](/image/boot9.png)
 
 Пересоздаем initrd image, чтобý он знал новое название Volume Group
@@ -91,9 +96,11 @@ mkinitrd -f -v /boot/initramfs-$(uname -r).img $(uname -r)
 test
 ```
 Отредактируем файл /boot/grub2/grub.cfg, уберем опции rghb и quiet
+
 ![Image alt](/image/boot10.png)
 
 Перезагружаемся
+
 ![Image alt](/image/boot11.png)
 
 
