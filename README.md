@@ -39,4 +39,64 @@
 
 ## Способ 3. rw init=/sysroot/bin/sh
 + В строке начинающейся с **linux16** заменяем ro на **rw init=/sysroot/bin/sh** и нажимаем **ctrl+x** для загрузки в систему
+![Image alt](/image/boot5.png)
+![Image alt](/image/boot6.png)
+
+#Установить систему с LVM, после чего переименовать VG
+
+Посмотрим текущее состояние системы
+```
+[root@boot vagrant]# vgs
+  VG     #PV #LV #SN Attr   VSize   VFree
+  centos   1   2   0 wz--n- <19,00g    0 
+```
+Приступим к переименованию:
+```
+[root@boot vagrant]# vgrename centos OtusRoot
+  Volume group "centos" successfully renamed to "OtusRoot"
+```
+Далее правим /etc/fstab/, /etc/default/grub, /boot/grub2/grub.cfg. Везде заменяем старое название на новое.
+![Image alt](/image/boot7.png)
+![Image alt](/image/boot8.png)
+![Image alt](/image/boot9.png)
+
+Пересоздаем initrd image, чтобý он знал новое название Volume Group
+```
+[root@boot vagrant]# mkinitrd -f -v /boot/initramfs-$(uname -r).img $(uname -r)
+```
+После перезагружаемся и если все сделано правильно успешно грузимся с новым именем.
+```
+[root@boot vagrant]# vgs 
+  VG       #PV #LV #SN Attr   VSize   VFree
+  OtusRoot   1   2   0 wz--n- <19,00g    0 
+```
+#Добавить модуль в initrd
+
+Скрипты модулей  находяться в директории /usr/lib/dracut/modules.d/. Для того чтобы добавить свой модуль создадим там папку с именем **01test**:
+
+```
+[root@boot vagrant]# mkdir /usr/lib/dracut/modules.d/01test
+```
+В эту директорию поместим два скрипта:
++ module-setup.sh - который устанавливает модуль и вызывает скрипт test.sh
++ test.sh - собственно сам вызываемый скрипт, в нем нарисован пингвин.
+
+Пересобираем образ initrd
+```
+mkinitrd -f -v /boot/initramfs-$(uname -r).img $(uname -r)
+```
+Проверим какие модули загружены в образ: 
+```
+[root@boot 01test]# lsinitrd -m /boot/initramfs-$(uname -r).img | grep test
+test
+```
+Отредактируем файл /boot/grub2/grub.cfg, уберем опции rghb и quiet
+![Image alt](/image/boot10.png)
+
+Перезагружаемся
+![Image alt](/image/boot11.png)
+
+
+
+
 
